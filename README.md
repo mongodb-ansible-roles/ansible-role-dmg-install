@@ -56,3 +56,4 @@ License
 -------
 
 [Apache License](LICENSE)
+# ansible-role-dmg-install
