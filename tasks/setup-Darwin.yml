@@ -1,0 +1,25 @@
+---
+- name: Check if software is installed
+  become: true
+  stat:
+    path: "{{ dmg_stat }}"
+  register: dmg
+
+- name: Download and install dmg
+  become: true
+  block:
+    - name: Download dmg
+      get_url:
+        url: "{{ dmg_download_url }}"
+        dest: "{{ dmg_download_dest }}"
+        mode: "0755"
+    - name: Mount dmg
+      command: hdiutil attach {{ dmg_download_dest }} -mountpoint {{ dmg_mount_path }}
+    - name: Get pkg path
+      command: find {{ dmg_mount_path }} -name *.pkg -o -name *.mpkg
+      register: pkg
+    - name: Install dmg
+      shell: installer -package "{{ pkg.stdout }}" -target "/"
+    - name: Detatch dmg
+      command: hdiutil detach "{{ dmg_mount_path }}"
+  when: not dmg.stat.exists
